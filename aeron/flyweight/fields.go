@@ -1,6 +1,7 @@
 /*
 Copyright 2016-2018 Stanislav Liberman
 Copyright 2022 Steven Stern
+Copyright 2023 Rubus Technologies Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +41,7 @@ type Int32Field struct {
 func (fld *Int32Field) Wrap(buffer *atomic.Buffer, offset int) int {
 	atomic.BoundsCheck(int32(offset), 4, buffer.Capacity())
 
-	fld.offset = unsafe.Pointer(uintptr(buffer.Ptr()) + uintptr(offset))
+	fld.offset = unsafe.Add(buffer.Ptr(), offset)
 	return 4
 }
 
@@ -65,7 +66,7 @@ type Int64Field struct {
 func (fld *Int64Field) Wrap(buffer *atomic.Buffer, offset int) int {
 	atomic.BoundsCheck(int32(offset), 8, buffer.Capacity())
 
-	fld.offset = unsafe.Pointer(uintptr(buffer.Ptr()) + uintptr(offset))
+	fld.offset = unsafe.Add(buffer.Ptr(), offset)
 	return 8
 }
 
@@ -105,26 +106,20 @@ func (fld *StringField) Wrap(buffer *atomic.Buffer, offset int, fly Flyweight, a
 
 	atomic.BoundsCheck(off, 4, buffer.Capacity())
 
-	fld.lenOffset = unsafe.Pointer(uintptr(buffer.Ptr()) + uintptr(off))
+	fld.lenOffset = unsafe.Add(buffer.Ptr(), off)
 	l := *(*int32)(fld.lenOffset)
 
 	atomic.BoundsCheck(off+4, l, buffer.Capacity())
 
 	fld.fly = fly
-	fld.dataOffset = unsafe.Pointer(uintptr(buffer.Ptr()) + uintptr(off+4))
+	fld.dataOffset = unsafe.Add(buffer.Ptr(), off+4)
 	return 4 + int(l) + offsetAdjustment
 }
 
 func (fld *StringField) Get() string {
 	length := *(*int32)(fld.lenOffset)
 
-	bArr := make([]byte, length)
-	for ix := 0; ix < int(length); ix++ {
-		uptr := unsafe.Pointer(uintptr(fld.dataOffset) + uintptr(ix))
-		bArr[ix] = *(*uint8)(uptr)
-	}
-
-	return string(bArr)
+	return string(unsafe.Slice((*byte)(fld.dataOffset), length))
 }
 
 func (fld *StringField) Set(value string) {
@@ -132,10 +127,7 @@ func (fld *StringField) Set(value string) {
 	prevLen := *(*int32)(fld.lenOffset)
 	*(*int32)(fld.lenOffset) = length
 
-	bArr := []byte(value)
-	srcUptr := unsafe.Pointer(&bArr[0])
-
-	util.Memcpy(uintptr(fld.dataOffset), uintptr(srcUptr), length)
+	copy(unsafe.Slice((*byte)(fld.dataOffset), length), value)
 
 	size := fld.fly.Size()
 	size -= int(prevLen)
@@ -148,8 +140,7 @@ type RawDataField struct {
 }
 
 func (f *RawDataField) Wrap(buffer *atomic.Buffer, offset int, length int32) int {
-	ptr := uintptr(buffer.Ptr()) + uintptr(offset)
-	f.buf.Wrap(unsafe.Pointer(ptr), length)
+	f.buf.Wrap(unsafe.Add(buffer.Ptr(), offset), length)
 
 	return int(length)
 }
@@ -195,11 +186,10 @@ func (fld *LengthAndRawDataField) Wrap(buffer *atomic.Buffer, rawOffset int) int
 	offsetAdjustment := int(offset) - rawOffset
 
 	atomic.BoundsCheck(offset, 4, buffer.Capacity())
-	fld.lenOffset = unsafe.Pointer(uintptr(buffer.Ptr()) + uintptr(offset))
+	fld.lenOffset = unsafe.Add(buffer.Ptr(), offset)
 
 	atomic.BoundsCheck(offset+4, fld.Length(), buffer.Capacity())
-	ptr := uintptr(buffer.Ptr()) + uintptr(offset+4)
-	fld.buf.Wrap(unsafe.Pointer(ptr), buffer.Capacity()-offset)
+	fld.buf.Wrap(unsafe.Add(buffer.Ptr(), offset+4), buffer.Capacity()-offset)
 
 	return 4 + int(fld.Length()) + offsetAdjustment
 }
