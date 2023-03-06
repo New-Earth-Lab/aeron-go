@@ -1,6 +1,8 @@
 /*
 Copyright 2016-2018 Stanislav Liberman
 Copyright 2022 Steven Stern
+Copyright 2023 Rubus Technologies Inc.
+
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +21,7 @@ package aeron
 
 import (
 	"fmt"
+	"math/bits"
 
 	"github.com/lirm/aeron-go/aeron/atomic"
 	"github.com/lirm/aeron-go/aeron/logbuffer"
@@ -71,7 +74,7 @@ func NewPublication(logBuffers *logbuffer.LogBuffers) *Publication {
 	pub.initialTermID = pub.metaData.InitTermID.Get()
 	pub.maxPayloadLength = pub.metaData.MTULen.Get() - logbuffer.DataFrameHeader.Length
 	pub.maxMessageLength = logbuffer.ComputeMaxMessageLength(termBufferCapacity)
-	pub.positionBitsToShift = int32(util.NumberOfTrailingZeroes(uint32(termBufferCapacity)))
+	pub.positionBitsToShift = int32(bits.TrailingZeros32(uint32(termBufferCapacity)))
 	pub.maxPossiblePosition = int64(termBufferCapacity) * (1 << 31)
 
 	pub.isClosed.Set(false)

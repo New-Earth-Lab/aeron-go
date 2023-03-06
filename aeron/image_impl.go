@@ -1,5 +1,6 @@
 /*
 Copyright 2016 Stanislav Liberman
+Copyright 2023 Rubus Technologies Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +18,8 @@ limitations under the License.
 package aeron
 
 import (
+	"math/bits"
+
 	"github.com/lirm/aeron-go/aeron/atomic"
 	"github.com/lirm/aeron-go/aeron/logbuffer"
 	"github.com/lirm/aeron-go/aeron/logbuffer/term"
@@ -54,7 +57,7 @@ func NewImage(sessionID int32, correlationID int64, logBuffers *logbuffer.LogBuf
 	}
 	capacity := logBuffers.Buffer(0).Capacity()
 	image.termLengthMask = capacity - 1
-	image.positionBitsToShift = util.NumberOfTrailingZeroes(uint32(capacity))
+	image.positionBitsToShift = uint8(bits.TrailingZeros32(uint32(capacity)))
 	image.header.SetInitialTermID(logBuffers.Meta().InitTermID.Get())
 	image.header.SetPositionBitsToShift(int32(image.positionBitsToShift))
 	image.isClosed.Set(false)
