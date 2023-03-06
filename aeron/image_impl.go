@@ -282,6 +282,5 @@ func (image *image) Close() error {
 }
 
 func indexByPosition(position int64, positionBitsToShift uint8) int32 {
-	term := uint64(position) >> positionBitsToShift
-	return util.FastMod3(term)
+	return int32((uint64(position) >> positionBitsToShift) % logbuffer.PartitionCount)
 }

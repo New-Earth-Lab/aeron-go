@@ -27,7 +27,6 @@ import (
 	"github.com/lirm/aeron-go/aeron/logbuffer"
 	"github.com/lirm/aeron-go/aeron/logbuffer/term"
 	"github.com/lirm/aeron-go/aeron/logging"
-	"github.com/lirm/aeron-go/aeron/util"
 )
 
 const (
@@ -335,8 +334,4 @@ func computeTermBeginPosition(activeTermID, positionBitsToShift, initialTermID i
 	termCount := int64(activeTermID - initialTermID)
 
 	return termCount << uint32(positionBitsToShift)
-}
-
-func nextPartitionIndex(currentIndex int32) int32 {
-	return util.FastMod3(uint64(currentIndex) + 1)
 }
