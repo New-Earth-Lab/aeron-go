@@ -1,5 +1,6 @@
 /*
 Copyright 2016 Stanislav Liberman
+Copyright 2023 Rubus Technologies Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,18 +18,18 @@ limitations under the License.
 package aeron
 
 import (
+	"os"
+	"testing"
+	"time"
+
 	"github.com/lirm/aeron-go/aeron/atomic"
 	"github.com/lirm/aeron-go/aeron/counters"
 	"github.com/lirm/aeron-go/aeron/driver"
 	"github.com/lirm/aeron-go/aeron/logbuffer"
-	"github.com/lirm/aeron-go/aeron/ringbuffer"
-	"github.com/lirm/aeron-go/aeron/util"
+	rb "github.com/lirm/aeron-go/aeron/ringbuffer"
 	"github.com/lirm/aeron-go/aeron/util/memmap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
-	"time"
 )
 
 func prepareCnc(t *testing.T) (string, *counters.MetaDataFlyweight) {
@@ -42,12 +43,6 @@ func prepareCnc(t *testing.T) (string, *counters.MetaDataFlyweight) {
 	t.Logf("meta data: %v", meta)
 
 	return counterFileName, meta
-}
-
-func TestNumberOfZeros(t *testing.T) {
-	assert.EqualValues(t, util.NumberOfTrailingZeroes(65536), 16)
-	assert.EqualValues(t, util.NumberOfTrailingZeroes(131072), 17)
-	assert.EqualValues(t, util.NumberOfTrailingZeroes(4194304), 22)
 }
 
 func TestNewPublication(t *testing.T) {
