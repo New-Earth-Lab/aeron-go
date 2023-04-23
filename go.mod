@@ -1,4 +1,4 @@
-module github.com/lirm/aeron-go
+module github.com/New-Earth-Lab/aeron-go
 
 go 1.19
 
@@ -6,6 +6,7 @@ require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2
 	github.com/edsrzf/mmap-go v1.1.0
 	github.com/google/uuid v1.3.0
+	github.com/lirm/aeron-go v0.0.0-20230124140246-d689ad4302d2
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.24.0
 )

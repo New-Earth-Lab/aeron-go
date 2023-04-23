@@ -57,7 +57,7 @@ func main() {
 		logger.Warning(err)
 	}
 	to := time.Duration(time.Millisecond.Nanoseconds() * *examples.ExamplesConfig.DriverTo)
-	ctx := aeron.NewContext().AeronDir(*examples.ExamplesConfig.AeronPrefix).MediaDriverTimeout(to).ErrorHandler(errorHandler)
+	ctx := aeron.NewContext().MediaDriverTimeout(to).ErrorHandler(errorHandler)
 
 	a, err := aeron.Connect(ctx)
 	if err != nil {
@@ -96,7 +96,7 @@ func main() {
 		case <-interrupt:
 			return
 		default:
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Microsecond)
 		}
 	}
 }

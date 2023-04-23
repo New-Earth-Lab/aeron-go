@@ -46,7 +46,7 @@ func main() {
 	}
 
 	to := time.Duration(time.Millisecond.Nanoseconds() * *examples.ExamplesConfig.DriverTo)
-	ctx := aeron.NewContext().AeronDir(*examples.ExamplesConfig.AeronPrefix).MediaDriverTimeout(to)
+	ctx := aeron.NewContext().MediaDriverTimeout(to)
 
 	a, err := aeron.Connect(ctx)
 	if err != nil {
